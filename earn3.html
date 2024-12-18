@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management Platform</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            background: #333;
+            color: #fff;
+            padding: 1rem;
+        }
+        .navbar span {
+            color: #fff;
+            padding: 0 15px;
+            cursor: pointer;
+        }
+        .block {
+            display: inline-block;
+            padding: 20px;
+            margin: 20px;
+            background-color: #ddd;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+        .block:hover {
+            background-color: #ccc;
+        }
+        .section {
+            display: none;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
+        .section.active {
+            display: block;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .modal-close {
+            cursor: pointer;
+            color: red;
+            float: right;
+        }
+        .user-data, .error-message {
+            display: none;
+            margin-top: 20px;
+        }
+        .data {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        #uploadForm {
+            margin-top: 20px;
+        }
+        .button {
+            cursor: pointer;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div>
+            <span onclick="showSection('home')">Home</span> | 
+            <span onclick="showSection('overview')">Overview</span> | 
+            <span onclick="showSection('about')">About</span> | 
+            <span onclick="openModal('userDataModal')">User's Data</span>
+        </div>
+        <div>
+            <span onclick="openModal('signupModal')">Signup</span> |
+            <span onclick="openModal('loginModal')">Login</span>
+        </div>
+    </div>
+
+    <div id="home" class="section active">
+        <h1>Welcome to the Task Management Platform</h1>
+        <p>Select your role:</p>
+        <div class="block" onclick="openRoleModal('adviser')">Signup or Login as Adviser</div>
+        <div class="block" onclick="openRoleModal('performer')">Signup or Login as Performer</div>
+    </div>
+
+    <div id="adviserDashboard" class="section">
+        <h1>Adviser Dashboard</h1>
+        <p>Welcome, Adviser! Here you can create and assign tasks.</p>
+        <form id="uploadForm" onsubmit="uploadFile(event)">
+            <input type="file" id="fileInput" required>
+            <button class="button" type="submit">Upload File</button>
+        </form>
+        <button class="button" onclick="logout()">Logout</button>
+    </div>
+
+    <div id="performerDashboard" class="section">
+        <h1>Performer Dashboard</h1>
+        <p>Welcome, Performer! Here you can view and complete tasks.</p>
+        <button class="button" onclick="logout()">Logout</button>
+    </div>
+
+    <div id="overview" class="section">
+        <h1>Overview</h1>
+        <p>Learn more about how our platform connects advisers with performers for task management.</p>
+    </div>
+
+    <div id="about" class="section">
+        <h1>About Us</h1>
+        <p>We are a platform dedicated to efficient task management between advisers and performers.</p>
+    </div>
+
+    <div id="signupModal" class="modal">
+        <span class="modal-close" onclick="closeModal('signupModal')">X</span>
+        <h2>Signup as <span id="signupRole"></span></h2>
+        <form onsubmit="signup(event)">
+            <input type="text" id="usernameInput" placeholder="Username" required><br><br>
+            <input type="text" id="nicknameInput" placeholder="Nickname" required><br><br>
+            <input type="email" id="emailInput" placeholder="Email" required><br><br>
+            <input type="password" id="passwordInput" placeholder="Password" required><br><br>
+            <input type="password" id="repeatPasswordInput" placeholder="Repeat Password" required><br><br>
+            <label for="verificationCode">Verification Code: <span id="currentCode"></span></label>
+            <input type="text" id="verificationCode" placeholder="Enter Code" required><br><br>
+            <button class="button" type="submit">Sign Up</button>
+        </form>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <span class="modal-close" onclick="closeModal('loginModal')">X</span>
+        <h2>Login as <span id="loginRole"></span></h2>
+        <form onsubmit="login(event)">
+            <input type="text" id="loginUsername" placeholder="Username" required><br><br>
+            <input type="password" id="loginPassword" placeholder="Password" required><br><br>
+            <button class="button" type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="userDataModal" class="modal">
+        <span class="modal-close" onclick="closeModal('userDataModal')">X</span>
+        <h2>User's Data</h2>
+        <label for="keyInput">Enter Key:</label>
+        <input type="text" id="keyInput" placeholder="Master or Private Key">
+        <button class="button" onclick="showData()">Submit</button>
+        <div id="error" class="error-message">Invalid Key. Please try again.</div>
+        
+        <div id="allData" class="user-data" style="display: none;">
+            <h2>All Users' Data</h2>
+            <button class="button" onclick="deleteAllUsers()">Delete All Users' Data</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Nickname</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userDataContainer"></tbody>
+            </table>
+        </div>
+        
+        <div id="privateData" class="user-data" style="display: none;">
+            <h2>Your Data</h2>
+            <button class="button" id="saveUserData" onclick="saveUserData()">Save Data</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Nickname</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userPrivateData"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let userRole = '';
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let currentUser = null;
+        let verificationCode = generateVerificationCode();
+        document.getElementById('currentCode').textContent = verificationCode;
+
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+        }
+
+        function openModal(modal) {
+            document.getElementById(modal).style.display = 'block';
+        }
+
+        function closeModal(modal) {
+            document.getElementById(modal).style.display = 'none';
+        }
+
+        function openRoleModal(role) {
+            userRole = role;
+            document.getElementById('signupRole').textContent = role;
+            document.getElementById('loginRole').textContent = role;
+            openModal('signupModal');
+        }
+
+        function generateVerificationCode() {
+            return Math.floor(100000 + Math.random() * 900000);
+        }
+
+        function signup(event) {
+            event.preventDefault();
+            const username = document.getElementById('usernameInput').value;
+            const nickname = document.getElementById('nicknameInput').value;
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const repeatPassword = document.getElementById('repeatPasswordInput').value;
+            const enteredCode = document.getElementById('verificationCode').value;
+
+            if (password !== repeatPassword) {
+                alert("Passwords do not match");
+                return;
+            }
+
+            if (enteredCode != verificationCode) {
+                alert("Invalid verification code");
+                return;
+            }
+
+            const user = { username, nickname, email, password, role: userRole };
+            users.push(user);
+            localStorage.setItem('users', JSON.stringify(users));
+            alert("Signup successful!");
+            closeModal('signupModal');
+        }
+
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const user = users.find(user => user.username === username && user.password === password && user.role === userRole);
+            if (user) {
+                currentUser = user;
+                showSection(`${userRole}Dashboard`);
+                closeModal('loginModal');
+            } else {
+                alert("Invalid username or password");
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            showSection('home');
+        }
+
+        function showData() {
+            const key = document.getElementById('keyInput').value;
+            document.getElementById('error').style.display = 'none';
+            if (key === 'Rm1122') {
+                document.getElementById('allData').style.display = 'block';
+                document.getElementById('privateData').style.display = 'none';
+                document.getElementById('userDataContainer').innerHTML = users.map((user, index) => 
+                    `<tr>
+                        <td>${user.username}</td>
+                        <td>${user.nickname}</td>
+                        <td>${user.email}</td>
+                        <td>${user.password}</td>
+                        <td>${user.role}</td>
+                        <td><button onclick="deleteUser(${index})">Delete</button></td>
+                    </tr>`
+                ).join('');
+            } else if (key === '1122') {
+                document.getElementById('privateData').style.display = 'block';
+                document.getElementById('allData').style.display = 'none';
+                const userData = users.filter(user => user.username === currentUser.username);
+                document.getElementById('userPrivateData').innerHTML = userData.map(user => 
+                    `<tr>
+                        <td>${user.username}</td>
+                        <td>${user.nickname}</td>
+                        <td>${user.email}</td>
+                        <td>${user.password}</td>
+                        <td>${user.role}</td>
+                        <td><button onclick="deleteUser(${users.indexOf(user)})">Delete</button></td>
+                    </tr>`
+                ).join('');
+            } else {
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        function deleteUser(index) {
+            users.splice(index, 1);
+            localStorage.setItem('users', JSON.stringify(users));
+            showData();
+        }
+
+        function deleteAllUsers() {
+            users = [];
+            localStorage.removeItem('users');
+            showData();
+        }
+
+        function saveUserData() {
+            if (currentUser) {
+                const userData = JSON.stringify(currentUser);
+                const blob = new Blob([userData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${currentUser.username}-data.json`;
+                link.click();
+            }
+        }
+
+        function uploadFile(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (file) {
+                alert(`File ${file.name} uploaded successfully`);
+            }
+        }
+    </script>
+</body>
+</html>
