@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Minecraft Game</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #87CEEB;
+      overflow: hidden;
+    }
+    #gameContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    canvas {
+      border: 2px solid #000;
+      background: #87CEEB;
+    }
+    #levelDisplay {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    <div id="levelDisplay">Level: 1 - Character: Miner</div>
+    <canvas id="gameCanvas"></canvas>
+  </div>
+  
+  <script>
+    // Canvas setup
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 600;
+
+    // Game variables
+    const blockSize = 40;
+    const rows = canvas.height / blockSize;
+    const cols = canvas.width / blockSize;
+    const blocks = [];
+    let currentLevel = 1;
+    const maxLevel = 7;
+    const characters = ["Miner", "Builder", "Explorer", "Farmer", "Warrior", "Wizard", "Engineer"];
+
+    // Initialize blocks
+    function createGrid() {
+      for (let i = 0; i < rows; i++) {
+        blocks[i] = [];
+        for (let j = 0; j < cols; j++) {
+          blocks[i][j] = null; // Empty block
+        }
+      }
+    }
+
+    // Draw the grid
+    function drawGrid() {
+      for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+          ctx.strokeStyle = "#ccc";
+          ctx.strokeRect(j * blockSize, i * blockSize, blockSize, blockSize);
+
+          // Draw block if present
+          if (blocks[i][j]) {
+            ctx.fillStyle = blocks[i][j];
+            ctx.fillRect(j * blockSize, i * blockSize, blockSize, blockSize);
+          }
+        }
+      }
+    }
+
+    // Update level and character
+    function updateLevel() {
+      if (currentLevel > maxLevel) {
+        alert("Congratulations! You completed all levels!");
+        currentLevel = 1;
+        createGrid();
+      } else {
+        document.getElementById('levelDisplay').innerText = 
+          `Level: ${currentLevel} - Character: ${characters[currentLevel - 1]}`;
+      }
+    }
+
+    // Handle mouse click to add blocks
+    canvas.addEventListener('click', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const col = Math.floor(x / blockSize);
+      const row = Math.floor(y / blockSize);
+
+      // Add block if empty
+      if (!blocks[row][col]) {
+        blocks[row][col] = `hsl(${Math.random() * 360}, 70%, 50%)`; // Random color
+        drawGrid();
+
+        // Check if the grid is full for level up
+        if (blocks.flat().every(block => block !== null)) {
+          currentLevel++;
+          createGrid();
+          updateLevel();
+        }
+      }
+    });
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGrid();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Initialize game
+    createGrid();
+    updateLevel();
+    gameLoop();
+  </script>
+</body>
+</html>

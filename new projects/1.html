@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combined Website with User's Data</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    #header {
+      background: #333;
+      color: white;
+      padding: 20px 10px;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    #nav {
+      display: none;
+      justify-content: center;
+      background-color: #444;
+      padding: 10px 0;
+    }
+
+    #nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-size: 16px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    #nav a:hover {
+      text-decoration: underline;
+    }
+
+    .section {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 30px 20px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      margin: 50px auto;
+    }
+
+    .form-container h2 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #333;
+    }
+
+    .form-container form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-container input {
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .form-container button {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .form-container button:hover {
+      background-color: #555;
+    }
+
+    .form-container p {
+      margin: 10px 0 0;
+    }
+
+    .form-container a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    .form-container a:hover {
+      text-decoration: underline;
+    }
+
+    #footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      margin-top: 20px;
+    }
+
+    #userData table {
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    #userData th, #userData td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    #userData th {
+      background-color: #444;
+      color: white;
+    }
+
+    #userData td {
+      background-color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">Welcome to Our Website</div>
+
+  <!-- Navigation -->
+  <div id="nav">
+    <a href="#" onclick="showSection('dashboard')">Dashboard</a>
+    <a href="#" onclick="showSection('about')">About</a>
+    <a href="#" onclick="showSection('rules')">Rules</a>
+    <a href="#" onclick="showSection('contact')">Contact</a>
+    <a href="#" onclick="showSection('policy')">Policy</a>
+    <a href="#" onclick="showSection('userData')">User's Data</a>
+  </div>
+
+  <!-- Registration/Login Section -->
+  <div id="login" class="section active">
+    <div class="form-container">
+      <h2>Register</h2>
+      <form onsubmit="registerUser(event)">
+        <input type="text" id="username" placeholder="Enter Username" required />
+        <input type="email" id="email" placeholder="Enter Email" required />
+        <input type="password" id="password" placeholder="Enter Password" required />
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Section -->
+  <div id="dashboard" class="section">
+    <h2>Welcome, User!</h2>
+    <p>Select a page from the navigation menu above to explore.</p>
+  </div>
+
+  <!-- About Section -->
+  <div id="about" class="section">
+    <h2>About Us</h2>
+    <p>This website is designed to provide seamless user experience for multiple functionalities.</p>
+  </div>
+
+  <!-- Rules Section -->
+  <div id="rules" class="section">
+    <h2>Rules</h2>
+    <p>1. Be respectful to all users.<br>2. Follow the website guidelines.<br>3. Avoid sharing personal information.</p>
+  </div>
+
+  <!-- Contact Section -->
+  <div id="contact" class="section">
+    <h2>Contact Us</h2>
+    <p>Email: support@example.com<br>Phone: +123456789</p>
+  </div>
+
+  <!-- Policy Section -->
+  <div id="policy" class="section">
+    <h2>Privacy Policy</h2>
+    <p>We prioritize your privacy and ensure your data is secure with us.</p>
+  </div>
+
+  <!-- User's Data Section -->
+  <div id="userData" class="section">
+    <h2>Registered Users</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Password</th>
+        </tr>
+      </thead>
+      <tbody id="userTable">
+        <!-- User data will appear here -->
+      </tbody>
+    </table>
+  </div>
+
+  <div id="footer">
+    &copy; 2024 Combined Website with User's Data
+  </div>
+
+  <script>
+    // Function to show specific section and hide others
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    // Function to register a user and save data to localStorage
+    function registerUser(event) {
+      event.preventDefault();
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      users.push({ username, email, password });
+      localStorage.setItem('users', JSON.stringify(users));
+
+      alert('User registered successfully!');
+      document.getElementById('login').reset();
+    }
+
+    // Function to populate user data in the User's Data section
+    function populateUserData() {
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const userTable = document.getElementById('userTable');
+      userTable.innerHTML = '';
+      users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${user.username}</td><td>${user.email}</td><td>${user.password}</td>`;
+        userTable.appendChild(row);
+      });
+    }
+
+    // Show user data when User's Data section is displayed
+    document.getElementById('nav').addEventListener('click', event => {
+      if (event.target.innerText === "User's Data") {
+        populateUserData();
+      }
+    });
+  </script>
+</body>
+</html>

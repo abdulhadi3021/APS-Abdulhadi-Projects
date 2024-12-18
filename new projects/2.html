@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bouncing Balls with Changing Colors</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bouncingCanvas"></canvas>
+  
+  <script>
+    const canvas = document.getElementById('bouncingCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    class Ball {
+      constructor(x, y, radius, color, dx, dy) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.dx = dx; // velocity x
+        this.dy = dy; // velocity y
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      update() {
+        if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+          this.dx = -this.dx;
+        }
+        if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+          this.dy = -this.dy;
+        }
+        this.x += this.dx;
+        this.y += this.dy;
+        this.draw();
+      }
+    }
+
+    const balls = [];
+    const colors = ['#FF5733', '#33FF57', '#5733FF', '#FF33B5', '#33FFF9', '#FFD433', '#FF3380', '#80FF33', '#3396FF', '#8C33FF'];
+
+    function randomColor() {
+      return `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+    }
+
+    function createBalls() {
+      for (let i = 0; i < 10; i++) {
+        const radius = 20;
+        const x = Math.random() * (canvas.width - radius * 4) + radius;
+        const y = Math.random() * (canvas.height - radius * 4) + radius;
+        const dx = (Math.random() - 0.00000001) * 4; // random velocity x
+        const dy = (Math.random() - 0.000000000001) * 4; // random velocity y
+        const color = colors[i];
+        balls.push(new Ball(x, y, radius, color, dx, dy));
+      }
+    }
+
+    function changeBallColors() {
+      setInterval(() => {
+        balls.forEach(ball => {
+          ball.color = randomColor();
+        });
+      }, 500);
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      balls.forEach(ball => ball.update());
+      requestAnimationFrame(animate);
+    }
+
+    createBalls();
+    changeBallColors();
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>

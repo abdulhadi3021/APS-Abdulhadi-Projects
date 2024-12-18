@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubble Shooter - Stylish</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(180deg, #1e3c72, #2a5298);
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      background: #fef0ff;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+    }
+    #game-status {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: rgb(255, 255, 255);
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 10;
+    }
+    #game-status h2 {
+      margin-bottom: 20px;
+    }
+    #game-status button {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #game-status button:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bubbleCanvas"></canvas>
+  <div id="game-status">
+    <h2 id="status-text">You Won!</h2>
+    <button id="next-button" onclick="nextLevel()">Next Level</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("bubbleCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 800;
+    canvas.height = 600;
+
+    const colors = ["#FF5733", "#33FF57", "#5733FF", "#FF33B5", "#33FFF9", "#FFC300"];
+    const bubbleRadius = 40;
+    const grid = [];
+    const shots = [];
+    let player = { x: canvas.width / 2, y: canvas.height - bubbleRadius * 2, color: randomColor(), angle: 0 };
+    let level = 1;
+    let rows = 5;
+    let bubbleSpeed = 8;
+
+    function createGrid() {
+      grid.length = 0;
+      for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < 10; c++) {
+          row.push({
+            x: c * bubbleRadius * 2 + bubbleRadius + (r % 2 === 1 ? bubbleRadius : 0),
+            y: r * bubbleRadius * 2 + bubbleRadius,
+            color: randomColor(),
+            active: true,
+          });
+        }
+        grid.push(row);
+      }
+    }
+
+    function drawGrid() {
+      grid.forEach((row) => {
+        row.forEach((bubble) => {
+          if (bubble.active) {
+            drawCircle(bubble.x, bubble.y, bubbleRadius, bubble.color);
+          }
+        });
+      });
+    }
+
+    function drawCircle(x, y, radius, color) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function drawPlayer() {
+      drawCircle(player.x, player.y, bubbleRadius, player.color);
+      ctx.beginPath();
+      ctx.moveTo(player.x, player.y);
+      ctx.lineTo(player.x + Math.cos(player.angle) * 70, player.y - Math.sin(player.angle) * 70);
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function shootBubble() {
+      shots.push({
+        x: player.x,
+        y: player.y,
+        dx: Math.cos(player.angle) * bubbleSpeed,
+        dy: -Math.sin(player.angle) * bubbleSpeed,
+        color: player.color,
+      });
+      player.color = randomValidColor();
+    }
+
+    function randomValidColor() {
+      const activeColors = [...new Set(grid.flat().filter(b => b.active).map(b => b.color))];
+      return activeColors[Math.floor(Math.random() * activeColors.length)];
+    }
+
+    function moveShots() {
+      shots.forEach((shot, index) => {
+        shot.x += shot.dx;
+        shot.y += shot.dy;
+
+        if (shot.x < 0 || shot.x > canvas.width || shot.y < 0) {
+          shots.splice(index, 1);
+          return;
+        }
+
+        for (let r = 0; r < grid.length; r++) {
+          for (let c = 0; c < grid[r].length; c++) {
+            const bubble = grid[r][c];
+            if (bubble.active && bubble.color === shot.color &&
+              distance(shot.x, shot.y, bubble.x, bubble.y) < bubbleRadius * 2) {
+              bubble.active = false;
+              checkConnectedBubbles(bubble.color, bubble);
+              shots.splice(index, 1);
+              return;
+            }
+          }
+        }
+      });
+    }
+
+    function checkConnectedBubbles(color, bubble) {
+      const queue = [bubble];
+      while (queue.length > 0) {
+        const current = queue.shift();
+        current.active = false;
+        getNeighbors(current).forEach((neighbor) => {
+          if (neighbor.active && neighbor.color === color) {
+            queue.push(neighbor);
+          }
+        });
+      }
+      checkWinCondition();
+    }
+
+    function getNeighbors(bubble) {
+      const neighbors = [];
+      const bubbleRow = grid.findIndex(row => row.includes(bubble));
+      const bubbleCol = grid[bubbleRow].indexOf(bubble);
+
+      const directions = [
+        [-1, 0], [1, 0],
+        [0, -1], [0, 1],
+        [-1, -1], [-1, 1], [1, -1], [1, 1],
+      ];
+
+      directions.forEach(([dr, dc]) => {
+        const row = bubbleRow + dr;
+        const col = bubbleCol + dc;
+        if (grid[row] && grid[row][col] && grid[row][col].active) {
+          neighbors.push(grid[row][col]);
+        }
+      });
+
+      return neighbors;
+    }
+
+    function checkWinCondition() {
+      if (grid.every(row => row.every(b => !b.active))) {
+        document.getElementById("game-status").style.display = "block";
+      }
+    }
+
+    function nextLevel() {
+      level++;
+      rows += 2;
+      bubbleSpeed += 2;
+      player.color = randomValidColor();
+      createGrid();
+      document.getElementById("game-status").style.display = "none";
+    }
+
+    function randomColor() {
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function distance(x1, y1, x2, y2) {
+      return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGrid();
+      drawPlayer();
+      moveShots();
+      shots.forEach(shot => drawCircle(shot.x, shot.y, bubbleRadius, shot.color));
+      requestAnimationFrame(gameLoop);
+    }
+
+    createGrid();
+    gameLoop();
+
+    canvas.addEventListener("mousemove", event => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+      player.angle = Math.atan2(player.y - mouseY, mouseX - player.x);
+    });
+
+    canvas.addEventListener("click", () => {
+      if (grid.flat().some(b => b.active)) {
+        shootBubble();
+      }
+    });
+  </script>
+</body>
+</html>
