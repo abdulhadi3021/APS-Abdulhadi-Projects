@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Try It Yourself</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #try-it {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 10px solid #4a90e2; /* Laptop border color */
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: url('./1.png') no-repeat center center; /* Background image */
+            background-size: cover; /* Cover the entire section */
+            width: 90%; /* Width for responsiveness */
+            max-width: 800px; /* Max width for large screens */
+            position: relative; /* For laptop lid effect */
+            color: white; /* Text color for better contrast */
+        }
+
+        h2 {
+            color: #4a90e2;
+        }
+
+        input, button, textarea {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 90%; /* Make inputs responsive */
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #357ab8; /* Darker shade on hover */
+        }
+
+        #output {
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            color: black; /* Output text color */
+        }
+
+        #outputFrame {
+            border: 1px solid #4a90e2;
+            width: 100%;
+            height: 200px; /* Height for the output frame */
+            border-radius: 5px;
+            display: block; /* Make the iframe a block element */
+        }
+    </style>
+</head>
+<body>
+
+<section id="try-it">
+    <h2>Try It Yourself!</h2>
+    <div>
+        <input type="text" id="colorInput" placeholder="Enter a color name (e.g., red)" />
+        <button onclick="changeColor()">Change Background Color</button>
+    </div>
+    <div>
+        <textarea id="codeInput" placeholder="Write your HTML code here..." rows="4"></textarea>
+        <button onclick="runCode()">Run HTML Code</button>
+    </div>
+    <div id="output">
+        <h3>Output:</h3>
+        <iframe id="outputFrame"></iframe>
+    </div>
+</section>
+
+<script>
+    function changeColor() {
+        const colorInput = document.getElementById("colorInput").value;
+        document.getElementById("try-it").style.backgroundColor = colorInput;
+    }
+
+    function runCode() {
+        const codeInput = document.getElementById("codeInput").value;
+        const outputFrame = document.getElementById("outputFrame");
+        const outputDocument = outputFrame.contentDocument || outputFrame.contentWindow.document;
+        
+        outputDocument.open();
+        outputDocument.write(codeInput);
+        outputDocument.close();
+    }
+</script>
+
+</body>
+</html>
